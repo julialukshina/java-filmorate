@@ -1,15 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
+@NoArgsConstructor
+//@Data
 public class User { //класс-модель для пользователей
     private int id;
     @NotNull

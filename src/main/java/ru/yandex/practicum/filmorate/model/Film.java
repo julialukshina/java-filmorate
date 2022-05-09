@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.NotBlank;
@@ -9,7 +9,11 @@ import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+
 public class Film { //класс-модель для фильмов
     private int id;
     @NotNull
