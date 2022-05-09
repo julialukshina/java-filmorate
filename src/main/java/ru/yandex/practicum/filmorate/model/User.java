@@ -1,18 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @EqualsAndHashCode
 @ToString
-@NoArgsConstructor
-//@Data
 public class User { //класс-модель для пользователей
     private int id;
     @NotNull
@@ -21,6 +20,7 @@ public class User { //класс-модель для пользователей
     private String email;
     @NotNull
     @NotBlank
+    @Pattern(regexp = "\\S*$")
     private String login;
     @NotNull
     private String name;
@@ -29,19 +29,13 @@ public class User { //класс-модель для пользователей
 
     public User(String email, String login, String name, LocalDate birthday) { /* конструктор, позволяющий
         создать объект без id*/
-        validation(login);
         this.email = email;
         this.login = login;
-        this.name = name;
         if (name.isBlank()) {
-            name = login;
+            this.name = login;
+        } else {
+            this.name = name;
         }
         this.birthday = birthday;
-    }
-
-    private void validation(String login) { //метод для валидации логина
-        if (login.contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелов");
-        }
     }
 }
