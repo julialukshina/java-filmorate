@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,48 +16,45 @@ import java.util.Map;
 @Validated
 @Slf4j
 public class UserController { //класс RestController
-    private final Map<String, User> users = new HashMap<>();
-    private final Map<Integer, String> idEmail = new HashMap<>();
-    private int id = 1;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping //возвращает список пользователей
     public Map<String, User> getAllUsers() {
-        return users;
+        return userService.getAllUsers();
     }
 
     @PostMapping //создает нового пользователя
     public User createNewUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getEmail())) {
-            throw new UserAlreadyExistException("Пользователь с таким адресом электронной почты уже существует");
-        }
-        user.setId(generateId());
-        users.put(user.getEmail(), user);
-        idEmail.put(user.getId(), user.getEmail());
-        log.info("Создан новый пользователь: {}", user);
-        return user;
+        return userService.createNewUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) { //обновляет данные пользователя
-        if (user.getId() == 0) {
-            throw new IllegalArgumentException("Для создания нового пользователя испольльзуйте POST-запрос");
-        }
-        if (idEmail.containsKey(user.getId()) && !(idEmail.get(user.getId()).equals(user.getEmail()))) {
-            users.remove(idEmail.get(user.getId()));
-        }
-        users.put(user.getEmail(), user);
-        idEmail.put(user.getId(), user.getEmail());
-        log.info("Пользователь с id {} обновлен", user.getId());
-        return user;
+        return userService.updateUser(user);
     }
 
-    private int generateId() {//метод генерации id
-        return id++;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
     }
 
-    public void resetController() {
-        id = 1;
-        users.clear();
-        idEmail.clear();
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Integer id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }

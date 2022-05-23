@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,6 +27,11 @@ public class Film { //класс-модель для фильмов
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
+    private Set<Integer> likes;
+
+    public Set<Integer> getLikes() {
+        return likes;
+    }
 
     public Film(String name, String description, LocalDate releaseDate, Duration duration) { /* конструктор, позволяющий
      создать объект без id*/
