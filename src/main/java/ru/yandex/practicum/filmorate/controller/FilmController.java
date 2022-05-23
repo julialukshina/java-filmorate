@@ -25,7 +25,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Map<Integer, Film> getAllFilms() { // возвращает список имеюшщихся фильмов
+    public List<Film> getAllFilms() { // возвращает список имеюшщихся фильмов
         return filmService.getAllFilms();
     }
 
@@ -50,10 +50,12 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getBestFilm(@RequestParam(required = false) Integer count) { //возвращаем лучшие фильмы
-        if (count == null) {
-            return filmService.getBestFilm(10);
-        }
+    public List<Film> getBestFilm(@RequestParam(defaultValue = "10") Integer count) { //возвращаем лучшие фильмы
         return filmService.getBestFilm(count);
+    }
+
+    @GetMapping ("/{id}")
+    public Film getFilmById(@PathVariable Integer id){
+        return filmService.getFilmById(id);
     }
 }

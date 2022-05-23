@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
@@ -24,7 +25,7 @@ public class UserController { //класс RestController
     }
 
     @GetMapping //возвращает список пользователей
-    public Map<String, User> getAllUsers() {
+    public List <User>  getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -56,5 +57,10 @@ public class UserController { //класс RestController
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping ("/{id}")
+    public User getUserById(@PathVariable Integer id){
+        return userService.getUserById(id);
     }
 }

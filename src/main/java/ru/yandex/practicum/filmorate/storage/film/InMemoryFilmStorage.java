@@ -2,10 +2,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -15,8 +18,8 @@ public class InMemoryFilmStorage implements FilmStorage{
     private int id = 1;
 
    @Override
-    public Map<Integer, Film> getAllFilms() { // возвращает список имеюшщихся фильмов
-        return films;
+    public List<Film> getAllFilms() { // возвращает список имеюшщихся фильмов
+        return new ArrayList<>(films.values());
     }
 
     @Override
@@ -32,8 +35,8 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film updateFilm(Film film) { //обновляет данные по фильму
-        if (film.getId() == 0) {
-            throw new IllegalArgumentException("Для публикации нового фильма испольльзуйте POST-запрос");
+        if (film.getId() <=0) {
+        throw new NotFoundException("Id должен быть положительным");
         }
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
@@ -44,8 +47,8 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public void deleteFilm(Film film) { //обновляет данные по фильму
-        if (film.getId() == 0) {
-            throw new IllegalArgumentException("Фильм с таким id не найден");
+        if (film.getId() <= 0) {
+            throw new NotFoundException("Фильм с таким id не найден");
         }
         if (films.containsKey(film.getId())) {
             films.remove(film.getId());
@@ -56,13 +59,17 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public Film getFilmById(Integer id) {
         if (id <= 0) {
-            throw new IllegalArgumentException("Id должен быть больше нуля");
+            throw new NotFoundException("Id должен быть больше нуля");
         }
         if (!films.containsKey(id)) {
-            throw new IllegalArgumentException("Фильма с таким id не существует");
+            throw new NotFoundException("Фильма с таким id не существует");
         }
         log.info("Информация о фильме с id {} предоставлена", id);
         return films.get(id);
+    }
+
+    public List<Integer> getAllFilmsId(){
+       return new ArrayList<>(films.keySet());
     }
     private int generateId() { //метод генерации id
         return id++;
