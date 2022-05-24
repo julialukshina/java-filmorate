@@ -13,11 +13,11 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage{ //реализация фильмохранилища
     private final Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
 
-   @Override
+   @Override // возвращает лист со всеми фильмами
     public List<Film> getAllFilms() { // возвращает список имеюшщихся фильмов
         return new ArrayList<>(films.values());
     }
@@ -46,7 +46,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public void deleteFilm(Film film) { //обновляет данные по фильму
+    public void deleteFilm(Film film) { //удаляет данные по фильму
         if (film.getId() <= 0) {
             throw new NotFoundException("Фильм с таким id не найден");
         }
@@ -57,7 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film getFilmById(Integer id) {
+    public Film getFilmById(Integer id) { //возвращает фильм по id
         if (id <= 0) {
             throw new NotFoundException("Id должен быть больше нуля");
         }
@@ -68,6 +68,7 @@ public class InMemoryFilmStorage implements FilmStorage{
         return films.get(id);
     }
 
+    @Override //возвращает лист с id всех фильмов
     public List<Integer> getAllFilmsId(){
        return new ArrayList<>(films.keySet());
     }
@@ -75,7 +76,8 @@ public class InMemoryFilmStorage implements FilmStorage{
         return id++;
     }
 
-    public void resetId() {
+    public void clear() { //очищает хранилище
+       films.clear();
         id = 1;
     }
 }

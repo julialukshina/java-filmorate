@@ -4,13 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -25,7 +23,7 @@ public class UserController { //класс RestController
     }
 
     @GetMapping //возвращает список пользователей
-    public List <User>  getAllUsers() {
+    public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -34,33 +32,33 @@ public class UserController { //класс RestController
         return userService.createNewUser(user);
     }
 
-    @PutMapping
+    @PutMapping //обновляет данные пользователя
     public User updateUser(@Valid @RequestBody User user) { //обновляет данные пользователя
         return userService.updateUser(user);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
+    @PutMapping("/{id}/friends/{friendId}") //добавляет в друзья
     public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
+    @DeleteMapping("/{id}/friends/{friendId}") //удаляет из друзей
     public void deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends")
+    @GetMapping("/{id}/friends") //возвращает список друзей
     public List<User> getFriends(@PathVariable Integer id) {
         return userService.getFriends(id);
     }
 
-    @GetMapping("{id}/friends/common/{otherId}")
+    @GetMapping("{id}/friends/common/{otherId}") //возвращает список общих друзей
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
-    @GetMapping ("/{id}")
-    public User getUserById(@PathVariable Integer id){
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) { //возвращает пользователя по id
         return userService.getUserById(id);
     }
 }

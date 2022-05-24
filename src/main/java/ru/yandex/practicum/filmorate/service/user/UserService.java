@@ -9,13 +9,12 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserService {//класс-сервис по запросам по пользователям
     private final UserStorage storage;
 
     @Autowired
@@ -24,7 +23,7 @@ public class UserService {
     }
 
     //возвращает список пользователей
-    public List <User> getAllUsers() {
+    public List<User> getAllUsers() {
         return storage.getAllUsers();
     }
 
@@ -35,10 +34,10 @@ public class UserService {
 
     public User updateUser(User user) { //обновляет данные пользователя
         return storage.updateUser(user);
-    }
+    } //обновляет данные пользователя
 
-    public void addFriend(Integer id1, Integer id2) {
-        if(id1<=0 || id2<=0){
+    public void addFriend(Integer id1, Integer id2) { //добавляет в друзья
+        if (id1 <= 0 || id2 <= 0) {
             throw new NotFoundException("Id пользователей должны быть положительными");
         }
         storage.getUserById(id1).getFriends().add(id2);
@@ -46,8 +45,8 @@ public class UserService {
         log.info("Пользователи с id {} и {} добавлены в друзья", id1, id2);
     }
 
-    public void deleteFriend (Integer id1, Integer id2){
-        if(id1<=0 || id2<=0){
+    public void deleteFriend(Integer id1, Integer id2) { //удаляет из друзей
+        if (id1 <= 0 || id2 <= 0) {
             throw new NotFoundException("Id пользователей должны быть положительными");
         }
         storage.getUserById(id1).getFriends().remove(id2);
@@ -55,14 +54,14 @@ public class UserService {
         log.info("Пользователи с id {} и {} удалены из друзей", id1, id2);
     }
 
-    public List<User> getFriends (Integer id){
-       return storage.getUserById(id).getFriends().stream()
-               .map(storage::getUserById)
-               .collect(Collectors.toList());
+    public List<User> getFriends(Integer id) { //возвращает список друзей
+        return storage.getUserById(id).getFriends().stream()
+                .map(storage::getUserById)
+                .collect(Collectors.toList());
     }
 
-    public List <User> getCommonFriends (Integer id1, Integer id2){
-        if(id1<=0 || id2<=0){
+    public List<User> getCommonFriends(Integer id1, Integer id2) { //возвращает список общих друзей
+        if (id1 <= 0 || id2 <= 0) {
             throw new NotFoundException("Id пользователей должны быть положительными");
         }
         Set<Integer> commonFriendsId = new HashSet<>(storage.getUserById(id1).getFriends());
@@ -74,5 +73,5 @@ public class UserService {
 
     public User getUserById(Integer id) {
         return storage.getUserById(id);
-    }
+    } //возвращает пользователя по id
 }

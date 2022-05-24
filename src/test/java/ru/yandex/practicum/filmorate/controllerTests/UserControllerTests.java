@@ -10,11 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,18 +34,21 @@ public class UserControllerTests {
     @Autowired
     private UserController userController;
 
+    @Autowired
+    private InMemoryUserStorage inMemoryUserStorage;
+
     @BeforeEach /*перед каждым тестом инициализируется поле пользователь, эталонному пользователю присваивается id,
     создается нужное окружение*/
     public void createUserObject() throws Exception {
         user = new User("sashaivanova@yandex.ru", "sasha", "Alexandra",
                 LocalDate.of(1983, 02, 02));
+        inMemoryUserStorage.clear();
         validUser.setId(1);
-        userController.resetController();
         body = objectMapper.writeValueAsString(user);
         goodCreate(body);
         user.setId(1);
         assertEquals(1, userController.getAllUsers().size()); //проверяем корректность создания объекта
-        assertEquals(user, userController.getAllUsers().get(user.getEmail()));
+        assertEquals(user, userController.getAllUsers().get(0));
     }
 
     @Test
@@ -52,7 +56,7 @@ public class UserControllerTests {
         user.setName("Александра");
         body = objectMapper.writeValueAsString(user);
         goodUpdate(body);//метод PUT будет выполнен корректно
-        assertEquals(user, userController.getAllUsers().get(user.getEmail()));
+        assertEquals(user, userController.getAllUsers().get(0));
     }
 
     @Test
@@ -63,13 +67,13 @@ public class UserControllerTests {
         this.mockMvc.perform(post("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertNull(userController.getAllUsers().get(user.getEmail()));
-        assertEquals(validUser, userController.getAllUsers().get(email));
+        assertFalse(inMemoryUserStorage.getAllUsersEmails().contains(user.getEmail()));
+        assertEquals(validUser, userController.getAllUsers().get(0));
         this.mockMvc.perform(put("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertNull(userController.getAllUsers().get(user.getEmail()));
-        assertEquals(validUser, userController.getAllUsers().get(email));
+        assertFalse(inMemoryUserStorage.getAllUsersEmails().contains(user.getEmail()));
+        assertEquals(validUser, userController.getAllUsers().get(0));
     }
 
 
@@ -87,8 +91,8 @@ public class UserControllerTests {
         user.setName("");
         body = objectMapper.writeValueAsString(user);
         goodCreate(body);
-        assertEquals(userController.getAllUsers().get(user.getEmail()).getName(), userController.getAllUsers().
-                get(user.getEmail()).getLogin());
+        assertEquals(userController.getAllUsers().get(1).getName(), userController.getAllUsers().
+                get(1).getLogin());
     }
 
     @Test
@@ -108,7 +112,7 @@ public class UserControllerTests {
         this.mockMvc.perform(post("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertEquals(validUser, userController.getAllUsers().get(user.getEmail()));
+        assertEquals(validUser, userController.getAllUsers().get(0));
     }
 
     private void goodUpdate(String body) throws Exception { //метод корректного обновления объекта
@@ -122,6 +126,6 @@ public class UserControllerTests {
         this.mockMvc.perform(put("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertEquals(validUser, userController.getAllUsers().get(user.getEmail()));
+        assertEquals(validUser, userController.getAllUsers().get(0));
     }
 }

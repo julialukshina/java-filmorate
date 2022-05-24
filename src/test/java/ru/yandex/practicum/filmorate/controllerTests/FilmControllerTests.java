@@ -10,8 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import java.time.Duration;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FilmControllerTest {
     private Film film;
     private Film validFilm = new Film("Тимур и его команда", "Фильм для детей",
-            LocalDate.of(1975, 04, 07), Duration.ofMinutes(124));
+            LocalDate.of(1975, 04, 07), 124);
     ;
     @Autowired
     ObjectMapper objectMapper;
@@ -33,14 +34,19 @@ class FilmControllerTest {
     @Autowired
     private FilmController filmController;
 
+    @Autowired
+    private InMemoryFilmStorage inMemoryFilmStorage;
+    @Autowired
+    private InMemoryUserStorage inMemoryUserStorage;
+
     @BeforeEach
     public void createFilmObject() {/*перед каждым тестом инициализируется поле фильм, эталонному фильму присваивается id,
     создается нужное окружение*/
-        filmController.getAllFilms().clear();
+        inMemoryFilmStorage.clear();
+        inMemoryUserStorage.clear();
         film = new Film("Тимур и его команда", "Фильм для детей",
-                LocalDate.of(1975, 04, 07), Duration.ofMinutes(124));
+                LocalDate.of(1975, 04, 07), 124);
         validFilm.setId(1);
-        filmController.resetId();
     }
 
     @Test
@@ -48,11 +54,11 @@ class FilmControllerTest {
         String body = objectMapper.writeValueAsString(film);
         goodCreate(body); //метод POST будет выполнен корректно
         film.setId(1);
-        assertEquals(film, filmController.getAllFilms().get(1));
+        assertEquals(film, filmController.getAllFilms().get(0));
         film.setDescription("Фильм для детей и взрослых");
         body = objectMapper.writeValueAsString(film);
         goodUpdate(body);//метод PUT будет выполнен корректно
-        assertEquals(film, filmController.getAllFilms().get(1));
+        assertEquals(film, filmController.getAllFilms().get(0));
     }
 
     @Test
@@ -61,12 +67,12 @@ class FilmControllerTest {
         goodCreate(body);
         film.setId(1);
         assertEquals(1, filmController.getAllFilms().size());
-        assertEquals(film, filmController.getAllFilms().get(1));
-        film.setDuration(Duration.ofMinutes(0)); //некорректное значение для продолжительности
+        assertEquals(film, filmController.getAllFilms().get(0));
+        film.setDuration(0); //некорректное значение для продолжительности
         body = objectMapper.writeValueAsString(film);
         bedCreate(body);
         bedUpdate(film);
-        film.setDuration(Duration.ofMinutes(124)); // возвращаем объект в первоначальное состояние
+        film.setDuration(124); // возвращаем объект в первоначальное состояние
         film.setId(0);
         //некорректное описание
         String bigDescription = new String(new char[201]).replace('\0', 'a');
@@ -92,7 +98,7 @@ class FilmControllerTest {
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, filmController.getAllFilms().size());
-        assertEquals(validFilm, filmController.getAllFilms().get(1));
+        assertEquals(validFilm, filmController.getAllFilms().get(0));
     }
 
     private void goodUpdate(String body) throws Exception { //метод некорректного обновления объекта
@@ -106,7 +112,7 @@ class FilmControllerTest {
         this.mockMvc.perform(put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, filmController.getAllFilms().size());
-        assertEquals(validFilm, filmController.getAllFilms().get(1));
+        assertEquals(validFilm, filmController.getAllFilms().get(0));
     }
 
 }

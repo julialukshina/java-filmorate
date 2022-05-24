@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -24,22 +22,22 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping
+    @GetMapping //возвращаем лист со всеми фильмами
     public List<Film> getAllFilms() { // возвращает список имеюшщихся фильмов
         return filmService.getAllFilms();
     }
 
-    @PostMapping
+    @PostMapping //создание нового фильма
     public Film createNewFilm(@Valid @RequestBody Film film) { //публикует информацию по новому фильму
         return filmService.createNewFilm(film);
     }
 
-    @PutMapping
+    @PutMapping // обнавление фильма
     public Film updateFilm(@Valid @RequestBody Film film) { //обновляет данные по фильму
         return filmService.updateFilm(film);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}") //пользователь ставит лайк
     public void likeFilm(@PathVariable Integer id, @PathVariable Integer userId) { //пользователь ставит лайк
         filmService.likeFilm(id, userId);
     }
@@ -54,8 +52,8 @@ public class FilmController {
         return filmService.getBestFilm(count);
     }
 
-    @GetMapping ("/{id}")
-    public Film getFilmById(@PathVariable Integer id){
+    @GetMapping("/{id}") //возвращаем фильм по id
+    public Film getFilmById(@PathVariable Integer id) { //возвращаем фильм по id
         return filmService.getFilmById(id);
     }
 }
