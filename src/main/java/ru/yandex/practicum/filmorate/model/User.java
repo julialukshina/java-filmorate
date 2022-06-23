@@ -29,9 +29,10 @@ public class User { //класс-модель для пользователей
     @Past
     private LocalDate birthday;
     private Set<Integer> friends = new HashSet<>();
+    private FriendshipStatus friendshipStatus;
 
-    public User(String email, String login, String name, LocalDate birthday) { /* конструктор, позволяющий
-        создать объект без id*/
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
         this.email = email;
         this.login = login;
         if (name.isBlank()) {
@@ -41,6 +42,18 @@ public class User { //класс-модель для пользователей
         }
         this.birthday = birthday;
     }
+
+//    public User(String email, String login, String name, LocalDate birthday) { /* конструктор, позволяющий
+//        создать объект без id*/
+//        this.email = email;
+//        this.login = login;
+//        if (name.isBlank()) {
+//            this.name = login;
+//        } else {
+//            this.name = name;
+//        }
+//        this.birthday = birthday;
+//    }
 
     public Set<Integer> getFriends() {
         return friends;

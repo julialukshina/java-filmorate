@@ -16,4 +16,8 @@ public interface FilmStorage { //интерфейс для film-хранилищ
     Film getFilmById(Integer id);
 
     List<Integer> getAllFilmsId();
+
+    void likeFilm(Integer filmId, Integer userId);
+
+    void deleteLike(Integer filmId, Integer userId);
 }

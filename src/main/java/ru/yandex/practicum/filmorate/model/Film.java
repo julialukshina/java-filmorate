@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +11,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -33,17 +34,23 @@ public class Film { //класс-модель для фильмов
     private Integer duration;
     private Set<Integer> likes = new HashSet<>();
 
+    private List<Genre> genres;
+    private Rating mpa;
+
     public Set<Integer> getLikes() {
         return likes;
     }
 
-    public Film(String name, String description, LocalDate releaseDate, Integer duration) { /* конструктор, позволяющий
-     создать объект без id*/
+    @JsonCreator
+    public Film(int id, String name, String description, LocalDate releaseDate, Integer duration, Rating mpa) {
         validation(releaseDate);
+        this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.mpa = mpa;
+        genres = null;
     }
 
     private void validation(LocalDate releaseDate) { //метод для валидации даты релиза и продолжительности

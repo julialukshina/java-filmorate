@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,8 +91,29 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(idEmail.keySet());
     }
 
+    @Override
+    public void addFriend(Integer id1, Integer id2) throws ValidationException {
+        if (!getAllUsersId().contains(id1) || !getAllUsersId().contains(id2)) {
+            throw new NotFoundException("Пользователей с такими id не существует");
+        }
+        getUserById(id1).getFriends().add(id2);
+        getUserById(id2).getFriends().add(id1);
+        log.info("Пользователи с id {} и {} добавлены в друзья", id1, id2);
+    }
 
+    @Override
+    public void deleteFriend(Integer id1, Integer id2) throws ValidationException {
+        if (!getAllUsersId().contains(id1) || !getAllUsersId().contains(id2)) {
+            throw new NotFoundException("Пользователей с такими id не существует");
+        }
+        getUserById(id1).getFriends().remove(id2);
+        getUserById(id2).getFriends().remove(id1);
+        log.info("Пользователи с id {} и {} удалены из друзей", id1, id2);
+    }
+
+    @Override
     public List<String> getAllUsersEmails() {
         return new ArrayList<>(idEmail.values());
     }
+
 }

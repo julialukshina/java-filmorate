@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import javax.xml.bind.ValidationException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,22 +37,12 @@ public class UserService {//класс-сервис по запросам по �
         return storage.updateUser(user);
     } //обновляет данные пользователя
 
-    public void addFriend(Integer id1, Integer id2) { //добавляет в друзья
-        if (id1 <= 0 || id2 <= 0) {
-            throw new NotFoundException("Id пользователей должны быть положительными");
-        }
-        storage.getUserById(id1).getFriends().add(id2);
-        storage.getUserById(id2).getFriends().add(id1);
-        log.info("Пользователи с id {} и {} добавлены в друзья", id1, id2);
+    public void addFriend(Integer id1, Integer id2) throws ValidationException { //добавляет в друзья
+        storage.addFriend(id1, id2);
     }
 
-    public void deleteFriend(Integer id1, Integer id2) { //удаляет из друзей
-        if (id1 <= 0 || id2 <= 0) {
-            throw new NotFoundException("Id пользователей должны быть положительными");
-        }
-        storage.getUserById(id1).getFriends().remove(id2);
-        storage.getUserById(id2).getFriends().remove(id1);
-        log.info("Пользователи с id {} и {} удалены из друзей", id1, id2);
+    public void deleteFriend(Integer id1, Integer id2) throws ValidationException { //удаляет из друзей
+        storage.deleteFriend(id1, id2);
     }
 
     public List<User> getFriends(Integer id) { //возвращает список друзей

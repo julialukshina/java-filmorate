@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -37,23 +36,18 @@ public class FilmService { //класс-сервис по запросам по 
     } // обнавление фильма
 
     public void likeFilm(Integer id, Integer userId) { //пользователь ставит лайк
-        if (id <= 0 || userId <= 0 || !filmStorage.getAllFilmsId().contains(id)) {
-            throw new NotFoundException("Фильм с данным id не найден");
-        }
-        if (userStorage.getAllUsersId().contains(userId)) {
-            filmStorage.getFilmById(id).getLikes().add(userId);
-        }
-        log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, id);
+//        if (id <= 0 || userId <= 0 || !filmStorage.getAllFilmsId().contains(id)) {
+//            throw new NotFoundException("Фильм с данным id не найден");
+//        }
+//        if (userStorage.getAllUsersId().contains(userId)) {
+//            filmStorage.getFilmById(id).getLikes().add(userId);
+//        }
+//        log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, id);
+        filmStorage.likeFilm(id, userId);
     }
 
     public void deleteLike(Integer id, Integer userId) { //пользователь удаляет лайк
-        if (id <= 0 || userId <= 0 || !filmStorage.getAllFilmsId().contains(id)) {
-            throw new NotFoundException("Фильм с данным id не найден");
-        }
-        if (userStorage.getAllUsersId().contains(userId)) {
-            filmStorage.getFilmById(id).getLikes().remove(userId);
-        }
-        log.info("Пользователь с id {} удалил лайк фильму с id {}", userId, id);
+        filmStorage.deleteLike(id, userId);
     }
 
     public List<Film> getBestFilm(Integer count) { //возвращаем лучшие фильмы

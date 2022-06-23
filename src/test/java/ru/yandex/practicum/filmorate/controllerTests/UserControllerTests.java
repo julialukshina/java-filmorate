@@ -4,49 +4,81 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
 public class UserControllerTests {
     private User user;
-    private User validUser = new User("sashaivanova@yandex.ru", "sasha", "Alexandra",
+    private final User validUser = new User(1, "sashaivanova@yandex.ru", "sasha", "Alexandra",
             LocalDate.of(1983, 02, 02));
     private String body;
-    @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private UserController userController;
+
+    private final ObjectMapper objectMapper;
+
+    private final MockMvc mockMvc;
+
+    private final UserController userController;
+
+    private final UserStorage userDbStorage;
+
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private InMemoryUserStorage inMemoryUserStorage;
+    public UserControllerTests(ObjectMapper objectMapper, MockMvc mockMvc, UserController userController,
+                               UserStorage userDbStorage, JdbcTemplate jdbcTemplate) {
+        this.objectMapper = objectMapper;
+        this.mockMvc = mockMvc;
+        this.userController = userController;
+        this.userDbStorage = userDbStorage;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
-    @BeforeEach /*перед каждым тестом инициализируется поле пользователь, эталонному пользователю присваивается id,
-    создается нужное окружение*/
+
+    @BeforeEach //перед каждым тестом инициализируется поле пользователь, создается нужное окружение
     public void createUserObject() throws Exception {
-        user = new User("sashaivanova@yandex.ru", "sasha", "Alexandra",
+        String sqlQuery = "delete from film_genre"; //обнуляем базу
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "delete from film_likes";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "delete from FRIENDSHIP";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "delete from films";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "delete from users";
+        jdbcTemplate.update(sqlQuery);
+
+        sqlQuery = "ALTER TABLE film_genre ALTER COLUMN id RESTART WITH 1"; //скидываем счетчики
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "ALTER TABLE film_likes ALTER COLUMN id RESTART WITH 1";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "ALTER TABLE friendship ALTER COLUMN id RESTART WITH 1";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1";
+        jdbcTemplate.update(sqlQuery);
+
+        user = new User(1, "sashaivanova@yandex.ru", "sasha", "Alexandra",
                 LocalDate.of(1983, 02, 02));
-        inMemoryUserStorage.clear();
-        validUser.setId(1);
         body = objectMapper.writeValueAsString(user);
         goodCreate(body);
-        user.setId(1);
         assertEquals(1, userController.getAllUsers().size()); //проверяем корректность создания объекта
         assertEquals(user, userController.getAllUsers().get(0));
     }
@@ -61,21 +93,39 @@ public class UserControllerTests {
 
     @Test
     public void bedCreateAndUpdateEmail() throws Exception { //тест валидации  email
-        final String email = user.getEmail();
         user.setEmail(""); //некорректное значение для email
         body = objectMapper.writeValueAsString(user);
         this.mockMvc.perform(post("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertFalse(inMemoryUserStorage.getAllUsersEmails().contains(user.getEmail()));
+        assertFalse(userDbStorage.getAllUsersEmails().contains(user.getEmail()));
         assertEquals(validUser, userController.getAllUsers().get(0));
         this.mockMvc.perform(put("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(1, userController.getAllUsers().size());
-        assertFalse(inMemoryUserStorage.getAllUsersEmails().contains(user.getEmail()));
+        assertFalse(userDbStorage.getAllUsersEmails().contains(user.getEmail()));
         assertEquals(validUser, userController.getAllUsers().get(0));
     }
 
+    @Test
+    public void createAndDeleteFriendship() throws Exception { //тест на добавление и удаление друзей
+        User user2 = new User(2, "ivanova@yandex.ru", "Ivanova", "Masha",
+                LocalDate.of(1988, 01, 12));
+        body = objectMapper.writeValueAsString(user2);
+        goodCreate(body);
+        assertEquals(2, userController.getAllUsers().size()); //проверяем корректность создания объекта
+        assertEquals(user2, userController.getAllUsers().get(1));
+        this.mockMvc.perform(put("/users/1/friends/2")) //корректное добавление друга
+                .andExpect(status().isOk());
+        this.mockMvc.perform(put("/users/1/friends/2")) //некорректное добавление друга
+                .andExpect(status().isBadRequest());
+        assertEquals(1, userController.getUserById(1).getFriends().size());
+        this.mockMvc.perform(delete("/users/1/friends/2")) //корректное удаление друга
+                .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/users/1/friends/2")) //некорректное удаление друга
+                .andExpect(status().isBadRequest());
+        assertEquals(0, userController.getUserById(1).getFriends().size());
+    }
 
     @Test
     public void bedCreateAndUpdateLogin() throws Exception { //тест валидации логина
