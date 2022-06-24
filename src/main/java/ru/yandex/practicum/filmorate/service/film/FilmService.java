@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -28,25 +29,37 @@ public class FilmService { //класс-сервис по запросам по 
     } //возвращаем лист со всеми фильмами
 
     public Film createNewFilm(Film film) { //публикует информацию по новому фильму
+        if (filmStorage.getAllFilmsId().contains(film.getId())) {
+            throw new ValidationException("Фильм с таким id уже есть");
+        }
+
         return filmStorage.createFilm(film);
-    } //создание нового фильма
+    }
 
     public Film updateFilm(Film film) { //обновляет данные по фильму
+        if (film.getId() <= 0) {
+            throw new NotFoundException("Id должен быть положительным");
+        }
         return filmStorage.updateFilm(film);
-    } // обнавление фильма
+    }
 
     public void likeFilm(Integer id, Integer userId) { //пользователь ставит лайк
-//        if (id <= 0 || userId <= 0 || !filmStorage.getAllFilmsId().contains(id)) {
-//            throw new NotFoundException("Фильм с данным id не найден");
-//        }
-//        if (userStorage.getAllUsersId().contains(userId)) {
-//            filmStorage.getFilmById(id).getLikes().add(userId);
-//        }
-//        log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, id);
+        if (!filmStorage.getAllFilmsId().contains(id)) {
+            throw new NotFoundException("Фильм с данным id не найден");
+        }
+        if (!userStorage.getAllUsersId().contains(userId)) {
+            throw new NotFoundException("Пользователь с данным id не найден");
+        }
         filmStorage.likeFilm(id, userId);
     }
 
     public void deleteLike(Integer id, Integer userId) { //пользователь удаляет лайк
+        if (!filmStorage.getAllFilmsId().contains(id)) {
+            throw new NotFoundException("Фильм с данным id не найден");
+        }
+        if (!userStorage.getAllUsersId().contains(userId)) {
+            throw new NotFoundException("Пользователь с данным id не найден");
+        }
         filmStorage.deleteLike(id, userId);
     }
 
@@ -61,6 +74,12 @@ public class FilmService { //класс-сервис по запросам по 
     }
 
     public Film getFilmById(Integer id) { //возвращаем фильм по id
+        if (id <= 0) {
+            throw new NotFoundException("Id должен быть больше нуля");
+        }
+        if (!filmStorage.getAllFilmsId().contains(id)) {
+            throw new NotFoundException("Фильма с таким id не существует");
+        }
         return filmStorage.getFilmById(id);
     }
 }

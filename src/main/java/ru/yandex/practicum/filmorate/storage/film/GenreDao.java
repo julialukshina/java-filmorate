@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.enums.GENRES;
@@ -21,9 +20,6 @@ public class GenreDao {
     }
 
     public Genre get(Integer genreId) {
-        if (genreId < 0 || genreId > 6) {
-            throw new NotFoundException("Жанр с таким id не существует");
-        }
         String sqlQuery = "select * from genres where genre_id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeGenre(rs), genreId);
     }

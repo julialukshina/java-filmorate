@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.sql.ResultSet;
@@ -19,9 +18,6 @@ public class RatingDao {
     }
 
     public Rating get(Integer ratingId) {
-        if (ratingId < 0 || ratingId > 5) {
-            throw new NotFoundException("Рейтинг с таким id не существует");
-        }
         String sqlQuery = "select * from rating where rating_id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeRating(rs), ratingId);
     }

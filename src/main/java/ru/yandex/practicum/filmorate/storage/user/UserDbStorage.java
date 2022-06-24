@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -28,9 +27,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (getAllUsersId().contains(user.getEmail())) {
-            throw new UserAlreadyExistException("Пользователь с таким адресом электронной почты уже существует");
-        }
         String sqlQuery = "insert into users (email, login, name, birthday) " +
                 "values (?, ?, ?, ?)";
         jdbcTemplate.update(sqlQuery,
@@ -47,9 +43,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        if (user.getId() <= 0) {
-            throw new NotFoundException("Id должен быть положительным");
-        }
         String sqlQuery = "update users set email=?, login =?, name=?, birthday=? where user_id=?";
         jdbcTemplate.update(sqlQuery,
                 user.getEmail(),
@@ -79,7 +72,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(User user) {
+    public void deleteUser(User user) { //метод не используется, написан, так как логически требуется, пока осталю тут
         if (!getAllUsersId().contains(user.getId())) {
             throw new NotFoundException("Пользователь с таким id не существует");
         }
@@ -90,9 +83,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(Integer id) {
-        if (!getAllUsersId().contains(id)) {
-            throw new NotFoundException("Пользователь с таким id не существует");
-        }
         log.info("Информация о пользователе с id {} предоставлена", id);
         String sqlQuery = "select * from users where user_id =?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeUser(rs), id);
@@ -113,20 +103,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Integer id1, Integer id2) throws ValidationException {
-        if (!getAllUsersId().contains(id1) || !getAllUsersId().contains(id2)) {
-            throw new NotFoundException("Пользователь с такими id не существует");
-        }
         String sqlQuery;
         User user1 = getUserById(id1);
         User user2 = getUserById(id2);
-        if (user1.getFriends().contains(id2) && !user2.getFriends().contains(id1)) {
-            String message = String.format("Пользователь с id = %s уже добавлен в друзья пользователю с id = %s", id2, id1);
-            throw new ValidationException(message);
-        }
-        if (user1.getFriends().contains(id2) && user2.getFriends().contains(id1)) {
-            String message = String.format("Пользователь с id = %s и пользователь с id = %s уже друг у друга в друзьях", id1, id2);
-            throw new ValidationException(message);
-        }
         if (!user1.getFriends().contains(id2) && !user2.getFriends().contains(id1)) {
             sqlQuery = "insert into FRIENDSHIP (user_id, friend_id, status_id) " +
                     "values (?, ?, ?)";
@@ -154,19 +133,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(Integer id1, Integer id2) throws ValidationException {
-        if (!getAllUsersId().contains(id1) || !getAllUsersId().contains(id2)) {
-            throw new NotFoundException("Пользователь с такими id не существует");
-        }
         String sqlQuery;
         User user1 = getUserById(id1);
         User user2 = getUserById(id2);
-        if (!user1.getFriends().contains(id2) && !user2.getFriends().contains(id1)) {
-            throw new ValidationException("Пользователи с такими id не состоят в дружеских отношениях");
-        }
-        if (!user1.getFriends().contains(id2) && user2.getFriends().contains(id1)) {
-            String message = String.format("Пользователь с id = %s не может изменять друзей пользователя с id = %s", id1, id2);
-            throw new ValidationException(message);
-        }
         if (user1.getFriends().contains(id2) && user2.getFriends().contains(id1)) {
             sqlQuery = "delete from friendship where user_id = ? and FRIEND_ID=?";
             jdbcTemplate.update(sqlQuery, id1, id2);

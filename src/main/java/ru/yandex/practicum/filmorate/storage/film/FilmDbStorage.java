@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.LikeDao;
@@ -25,7 +24,6 @@ public class FilmDbStorage implements FilmStorage {
     private final RatingDao ratingDao;
     private final LikeDao likeDao;
     private final GenreDao genreDao;
-
     private final UserStorage userStorage;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, RatingDao ratingDao, LikeDao likeDao, GenreDao genreDao, UserStorage userStorage) {
@@ -38,9 +36,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-        if (getAllFilmsId().contains(film.getId())) {
-            throw new ValidationException("Фильм с таким id уже есть");
-        }
         String sqlQuery = "insert into films (name, description, release_Date, duration, rating_id) " +
                 "values (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sqlQuery,
@@ -61,9 +56,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (film.getId() <= 0) {
-            throw new NotFoundException("Id должен быть положительным");
-        }
         String sqlQuery = "update films set name=?, description =?, release_Date=?, duration=?, rating_id=? where film_id=?";
         jdbcTemplate.update(sqlQuery,
                 film.getName(),
@@ -91,7 +83,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Film film) {
+    public void deleteFilm(Film film) { //метод не используется, написан, так как логически требуется, пока осталю тут
         if (!getAllFilmsId().contains(film.getId())) {
             throw new NotFoundException("Фильм с таким id не найден");
         }
@@ -102,12 +94,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Integer id) {
-        if (id <= 0) {
-            throw new NotFoundException("Id должен быть больше нуля");
-        }
-        if (!getAllFilmsId().contains(id)) {
-            throw new NotFoundException("Фильма с таким id не существует");
-        }
         log.info("Информация о фильме с id {} предоставлена", id);
         String sqlQuery = "select * from films where film_id =?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeFilm(rs), id);
@@ -137,23 +123,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void likeFilm(Integer filmId, Integer userId) { //пользователь ставит лайк
-        if (!getAllFilmsId().contains(filmId)) {
-            throw new NotFoundException("Фильм с данным id не найден");
-        }
-        if (!userStorage.getAllUsersId().contains(userId)) {
-            throw new NotFoundException("Пользователь с данным id не найден");
-        }
         likeDao.likeFilm(filmId, userId);
     }
 
     @Override
     public void deleteLike(Integer filmId, Integer userId) {//пользователь удаляет лайк
-        if (!getAllFilmsId().contains(filmId)) {
-            throw new NotFoundException("Фильм с данным id не найден");
-        }
-        if (!userStorage.getAllUsersId().contains(userId)) {
-            throw new NotFoundException("Пользователь с данным id не найден");
-        }
         likeDao.deleteLike(filmId, userId);
     }
 }
