@@ -32,7 +32,7 @@ public class FilmService { //класс-сервис по запросам по 
         if (filmStorage.getAllFilmsId().contains(film.getId())) {
             throw new ValidationException("Фильм с таким id уже есть");
         }
-
+        log.info("Появилась информация о новом фильме: {}", film);
         return filmStorage.createFilm(film);
     }
 
@@ -40,6 +40,7 @@ public class FilmService { //класс-сервис по запросам по 
         if (film.getId() <= 0) {
             throw new NotFoundException("Id должен быть положительным");
         }
+        log.info("Информация о фильме с id {} обновлена", film.getId());
         return filmStorage.updateFilm(film);
     }
 
@@ -50,6 +51,7 @@ public class FilmService { //класс-сервис по запросам по 
         if (!userStorage.getAllUsersId().contains(userId)) {
             throw new NotFoundException("Пользователь с данным id не найден");
         }
+        log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, id);
         filmStorage.likeFilm(id, userId);
     }
 
@@ -60,6 +62,7 @@ public class FilmService { //класс-сервис по запросам по 
         if (!userStorage.getAllUsersId().contains(userId)) {
             throw new NotFoundException("Пользователь с данным id не найден");
         }
+        log.info("Пользователь с id {} удалил лайк фильму с id {}", userId, id);
         filmStorage.deleteLike(id, userId);
     }
 
@@ -80,6 +83,7 @@ public class FilmService { //класс-сервис по запросам по 
         if (!filmStorage.getAllFilmsId().contains(id)) {
             throw new NotFoundException("Фильма с таким id не существует");
         }
+        log.info("Информация о фильме с id {} предоставлена", id);
         return filmStorage.getFilmById(id);
     }
 }

@@ -50,7 +50,6 @@ public class FilmDbStorage implements FilmStorage {
             genreDao.saveGenres(film.getGenres(), filmId);
         }
         film.setId(filmId);
-        log.info("Появилась информация о новом фильме: {}", film);
         return getFilmById(filmId);
     }
 
@@ -67,7 +66,6 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             genreDao.updateGenres(film);
         }
-        log.info("Информация о фильме с id {} обновлена", film.getId());
         Film film1 = getFilmById(film.getId());
         if (film.getGenres() != null && film1.getGenres() == null) {
             film1.setGenres(new ArrayList<>());
@@ -94,7 +92,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Integer id) {
-        log.info("Информация о фильме с id {} предоставлена", id);
         String sqlQuery = "select * from films where film_id =?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeFilm(rs), id);
     }

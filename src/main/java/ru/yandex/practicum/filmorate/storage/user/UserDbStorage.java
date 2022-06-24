@@ -37,7 +37,6 @@ public class UserDbStorage implements UserStorage {
         sqlQuery = "select user_id from users order by user_id desc limit 1";
         Integer userId = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
         user.setId(userId);
-        log.info("Создан новый пользователь: {}", user);
         return getUserById(userId);
     }
 
@@ -50,7 +49,6 @@ public class UserDbStorage implements UserStorage {
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
-        log.info("Пользователь с id {} обновлен", user.getId());
         return getUserById(user.getId());
     }
 
@@ -83,7 +81,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(Integer id) {
-        log.info("Информация о пользователе с id {} предоставлена", id);
         String sqlQuery = "select * from users where user_id =?";
         return jdbcTemplate.queryForObject(sqlQuery, (rs, rowNum) -> makeUser(rs), id);
     }
@@ -146,6 +143,7 @@ public class UserDbStorage implements UserStorage {
         if (user1.getFriends().contains(id2) && !user2.getFriends().contains(id1)) {
             sqlQuery = "delete from friendship where user_id = ? and FRIEND_ID=?";
             jdbcTemplate.update(sqlQuery, id1, id2);
+            log.info("Пользователь с id {} удален из друзей у пользователя с id {}", id2, id1);
         }
     }
 

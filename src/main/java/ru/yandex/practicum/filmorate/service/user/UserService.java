@@ -34,6 +34,7 @@ public class UserService {//класс-сервис по запросам по �
         if (storage.getAllUsersId().contains(user.getEmail())) {
             throw new UserAlreadyExistException("Пользователь с таким адресом электронной почты уже существует");
         }
+        log.info("Создан новый пользователь: {}", user);
         return storage.createUser(user);
     }
 
@@ -41,6 +42,7 @@ public class UserService {//класс-сервис по запросам по �
         if (user.getId() <= 0) {
             throw new NotFoundException("Id должен быть положительным");
         }
+        log.info("Пользователь с id {} обновлен", user.getId());
         return storage.updateUser(user);
     } //обновляет данные пользователя
 
@@ -99,6 +101,7 @@ public class UserService {//класс-сервис по запросам по �
         if (!storage.getAllUsersId().contains(id)) {
             throw new NotFoundException("Пользователь с таким id не существует");
         }
+        log.info("Информация о пользователе с id {} предоставлена", id);
         return storage.getUserById(id);
     } //возвращает пользователя по id
 }

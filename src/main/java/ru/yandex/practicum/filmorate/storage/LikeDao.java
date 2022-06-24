@@ -22,7 +22,6 @@ public class LikeDao {
         jdbcTemplate.update(sqlQuery,
                 filmId,
                 userId);
-        log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, filmId);
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
@@ -30,7 +29,6 @@ public class LikeDao {
         jdbcTemplate.update(sqlQuery,
                 filmId,
                 userId);
-        log.info("Пользователь с id {} удалил лайк фильму с id {}", userId, filmId);
     }
 
     public List<Integer> completionLikes(Integer filmId) {
